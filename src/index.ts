@@ -11,7 +11,7 @@ if (!existsSync(dir) && dir !== '/') {
     try {
         mkdirSync(dir, { recursive: true });
     } catch (e) {
-        console.warn("Konnte /data nicht erstellen, weiche auf lokalen Pfad aus.");
+        console.warn((e as Error).message);
     }
 }
 
@@ -47,7 +47,6 @@ const check = db.query("SELECT COUNT(*) as total FROM books").get() as { total: 
 if (check.total === 0) {
     console.log("Seeding BookSwipe Data...");
     
-    // Bücher einfügen & IDs speichern
     const b1 = db.prepare("INSERT INTO books (title, author, cover) VALUES (?, ?, ?)").run(
         'Dune', 'Frank Herbert', 'https://images.unsplash.com/photo-1544947950-fa07a98d237f'
     ).lastInsertRowid;
@@ -56,7 +55,6 @@ if (check.total === 0) {
         '1984', 'George Orwell', 'https://images.unsplash.com/photo-1541963463532-d68292c34b19'
     ).lastInsertRowid;
 
-    // Snippets einfügen
     const insertSnippet = db.prepare("INSERT INTO snippets (book_id, content, bg_image) VALUES (?, ?, ?)");
     
     insertSnippet.run(Number(b1), 'Ich darf keine Angst haben. Die Angst tötet das Bewusstsein.', 'https://images.unsplash.com/photo-1506466010722-395aa2bef877');
@@ -103,4 +101,4 @@ const app = new Elysia()
     })
     .listen(3001);
 
-console.log("BookSwipe Backend läuft auf http://localhost:3001");
+console.log("BookSwipe Backend running on http://localhost:3001");
