@@ -17,7 +17,6 @@ if (!existsSync(dir) && dir !== '/') {
 
 const db = new Database(dbPath);
 
-// --- DATABASE SCHEMA ---
 db.run(`
   CREATE TABLE IF NOT EXISTS books (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,11 +42,10 @@ db.run(`
   );
 `);
 
-// --- SEED DATA ---
 const check = db.query("SELECT COUNT(*) as total FROM books").get() as { total: number };
 
 if (check.total === 0) {
-    console.log("📦 Seeding BookSwipe Data...");
+    console.log("Seeding BookSwipe Data...");
     
     // Bücher einfügen & IDs speichern
     const b1 = db.prepare("INSERT INTO books (title, author, cover) VALUES (?, ?, ?)").run(
@@ -64,10 +62,9 @@ if (check.total === 0) {
     insertSnippet.run(Number(b1), 'Ich darf keine Angst haben. Die Angst tötet das Bewusstsein.', 'https://images.unsplash.com/photo-1506466010722-395aa2bef877');
     insertSnippet.run(Number(b2), 'Wer die Vergangenheit kontrolliert, kontrolliert die Zukunft.', 'https://images.unsplash.com/photo-1509248961158-e54f6934749c');
     
-    console.log("✅ Seeding abgeschlossen.");
+    console.log("Seeding abgeschlossen.");
 }
 
-// --- API ENDPOINTS ---
 const app = new Elysia()
     .use(cors())
     .get("/swipe/next", () => {
@@ -106,4 +103,4 @@ const app = new Elysia()
     })
     .listen(3001);
 
-console.log("🦊 BookSwipe Backend läuft auf http://localhost:3001");
+console.log("BookSwipe Backend läuft auf http://localhost:3001");
