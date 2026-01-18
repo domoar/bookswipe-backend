@@ -1,0 +1,47 @@
+Table users {
+  id integer [primary key, increment]
+  username varchar
+  email varchar [unique]
+  created_at timestamp [default: `now()`]
+  // Emotionale Profile werden hier gespeichert oder berechnet
+}
+
+Table books {
+  id integer [primary key, increment]
+  title varchar
+  author varchar
+  publisher varchar
+  isbn varchar
+  buy_link text
+}
+
+Table snippets {
+  id integer [primary key, increment]
+  book_id integer [ref: > books.id]
+  content text [note: 'The quote or reading sample']
+  background_image_url text [note: 'The aesthetic background for the swipe card']
+  type varchar [note: 'quote, first_page, blurb']
+}
+
+Table tags {
+  id integer [primary key, increment]
+  name varchar [note: 'bestseller, indie, spicy, dark, hopeful']
+  color_code varchar
+}
+
+Table book_tags {
+  book_id integer [ref: > books.id]
+  tag_id integer [ref: > tags.id]
+  
+  indexes {
+    (book_id, tag_id) [pk]
+  }
+}
+
+Table swipes {
+  id integer [primary key, increment]
+  user_id integer [ref: > users.id]
+  snippet_id integer [ref: > snippets.id]
+  direction varchar [note: 'left (dislike), right (like)']
+  created_at timestamp [default: `now()`]
+}
