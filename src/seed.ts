@@ -1,8 +1,54 @@
-export const dbPath = '/data/books.db';
-
 import { Database } from 'bun:sqlite';
+import { join } from 'node:path';
+import { existsSync, mkdirSync } from 'node:fs';
+
+export const dbPath = join(import.meta.dir, '../data/books.db');
+
+// Erstelle das data-Verzeichnis, falls es nicht existiert
+const dataDir = join(import.meta.dir, '../data');
+if (!existsSync(dataDir)) {
+    mkdirSync(dataDir, { recursive: true });
+}
 
 export const seedDatabase = (db: Database) => {
+    // Erstelle Tabellen, falls sie nicht existieren
+    db.run(`
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            email TEXT UNIQUE
+        );
+        CREATE TABLE IF NOT EXISTS books (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT,
+            author TEXT,
+            cover TEXT,
+            publisher TEXT,
+            isbn TEXT,
+            buy_link TEXT
+        );
+        CREATE TABLE IF NOT EXISTS snippets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            book_id INTEGER,
+            content TEXT,
+            bg_image TEXT,
+            FOREIGN KEY(book_id) REFERENCES books(id)
+        );
+        CREATE TABLE IF NOT EXISTS tags (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE
+        );
+        CREATE TABLE IF NOT EXISTS swipes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            userId INTEGER,
+            snippet_id INTEGER,
+            direction TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(userId) REFERENCES users(id),
+            FOREIGN KEY(snippet_id) REFERENCES snippets(id)
+        );
+    `);
+
     const check = db.query("SELECT COUNT(*) as total FROM books").get() as { total: number };
 
     if (check.total === 0) {

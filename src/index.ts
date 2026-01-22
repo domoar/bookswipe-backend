@@ -1,29 +1,42 @@
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import { Database } from 'bun:sqlite';
-import { seedDatabase, dbPath } from './seed';
+import { dbPath, initDatabase, seedBooks } from './database';
 
-import { swipesRoutes } from './routes/swipes';
-import { usersRoutes } from './routes/users';
-import { tagsRoutes } from './routes/tags';
-import { snippetsRoutes } from './routes/snippets';
-import { booksRoutes } from './routes/books';
-import { recommendationsRoutes } from './routes/recommendations';
+// Import neue API Routes
+import { bookRoutes } from './routes/api-books';
+import { swipeRoutes } from './routes/api-swipes';
+import { libraryRoutes } from './routes/api-library';
+import { statsRoutes } from './routes/api-stats';
+import { recommendationsRoutes } from './routes/api-recommendations';
 
+// Datenbank initialisieren
 const db = new Database(dbPath);
-seedDatabase(db);
+initDatabase(db);
+seedBooks(db);
 
 const app = new Elysia();
 
-app.use(cors());
+// CORS für Frontend (localhost:3000)
+app.use(cors({
+    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true
+}));
 
-swipesRoutes(app, db);
-usersRoutes(app, db);
-tagsRoutes(app, db);
-snippetsRoutes(app, db);
-booksRoutes(app, db);
+// API Routes registrieren
+bookRoutes(app, db);
+swipeRoutes(app, db);
+libraryRoutes(app, db);
+statsRoutes(app, db);
 recommendationsRoutes(app, db);
 
-app.listen(3001);
+// Health Check
+app.get('/health', () => ({ status: 'ok' }));
 
-console.log("BookSwipe Backend running on http://localhost:3001");
+// Server auf Port 8000
+app.listen(8000);
+
+console.log("🚀 BookSwipe Backend running on http://localhost:8000");
+console.log("📚 API Base URL: http://localhost:8000/api");
+console.log("✅ CORS enabled for localhost:3000");
